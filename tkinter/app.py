@@ -137,20 +137,24 @@ top = Tk()
 # You can set the geometry attribute to change the root windows size
 top.geometry("800x700")  # You want the size of the app to be 500x500
 top.resizable(0, 0)  # Don't allow resizing in the x or y direction
-top.title('Zenith, Machine Learning Project')
+top.title('Autism Spectrum Disorder Classification')
 top.option_add("*Button.Background", "black")
 top.option_add("*Button.Foreground", "red")
-
+Label(top, text="Features").place(x=30, y=20)
+Label(top, text="Performance").place(x=530, y=20)
 label_pos_x = 30
 label_pos_y = 50
 
 Label(top, text="A1_Score").place(x=label_pos_x, y=label_pos_y)
+Label(top, text="Accuracy").place(x=label_pos_x+500, y=label_pos_y)
 label_pos_y += 20
 
 Label(top, text="A2_Score").place(x=label_pos_x, y=label_pos_y)
+Label(top, text="Specificity").place(x=label_pos_x+500, y=label_pos_y)
 label_pos_y += 20
 
 Label(top, text="A3_Score").place(x=label_pos_x, y=label_pos_y)
+Label(top, text="Fernitisity").place(x=label_pos_x+500, y=label_pos_y)
 label_pos_y += 20
 
 Label(top, text="A4_Score").place(x=label_pos_x, y=label_pos_y)
@@ -206,14 +210,20 @@ entry_pos_y = 50
 
 e1 = Entry(top)
 e1.place(x=entry_pos_x, y=entry_pos_y)
+accuracy_entry = Entry(top)
+accuracy_entry.place(x=entry_pos_x+400, y=entry_pos_y)
 entry_pos_y += 20
 
 e2 = Entry(top)
 e2.place(x=entry_pos_x, y=entry_pos_y)
+specificity_entry = Entry(top)
+specificity_entry.place(x=entry_pos_x+400, y=entry_pos_y)
 entry_pos_y += 20
 
 e3 = Entry(top)
 e3.place(x=entry_pos_x, y=entry_pos_y)
+fernitisity_entry = Entry(top)
+fernitisity_entry.place(x=entry_pos_x+400, y=entry_pos_y)
 entry_pos_y += 20
 
 e4 = Entry(top)
@@ -280,6 +290,8 @@ e19 = Entry(top)
 e19.place(x=entry_pos_x, y=entry_pos_y)
 entry_pos_y += 20
 
+
+Label(top, text="Classification : ").place(x=120, y=625)
 entryText = StringVar()
 prediction_entry = Entry(top, textvariable=entryText, width=60)
 prediction_entry.place(x=200, y=625)
@@ -532,25 +544,25 @@ def create_lr_graph():
     plt.show()
 
 
-Button(top, text="Confusion matrix using KNN", command=create_knn_confusion_matrix, activebackground="pink",
-       activeforeground="blue").place(x=50, y=470)
+# Button(top, text="Confusion matrix using KNN", command=create_knn_confusion_matrix, activebackground="pink",
+#        activeforeground="blue").place(x=50, y=470)
 
 Button(top, text="Classify using KNN", command=classify_using_knn, activebackground="pink",
        activeforeground="blue").place(x=230, y=470)
 
-Button(top, text="Create KNN Graphs", command=create_knn_graph, activebackground="pink",
-       activeforeground="green").place(x=490, y=470)
+# Button(top, text="Create KNN Graphs", command=create_knn_graph, activebackground="pink",
+#        activeforeground="green").place(x=490, y=470)
 
-Button(top, text="Classify using Random Forest", command=classify_using_rf, activebackground="pink",
+Button(top, text="Classify using RF", command=classify_using_rf, activebackground="pink",
        activeforeground="blue").place(x=230, y=520)
 
-Button(top, text="Create Random Forest Graphs", command=create_rf_graph, activebackground="pink",
-       activeforeground="green").place(x=490, y=520)
+# Button(top, text="Create Random Forest Graphs", command=create_rf_graph, activebackground="pink",
+#        activeforeground="green").place(x=490, y=520)
 
-Button(top, text="Classify using Logistic Regression", command=classify_using_lr, activebackground="pink",
+Button(top, text="Classify using LR", command=classify_using_lr, activebackground="pink",
        activeforeground="blue").place(x=230, y=570)
 
-Button(top, text="Create Logistic Regression Graphs", command=create_lr_graph, activebackground="pink",
-       activeforeground="green").place(x=490, y=570)
+# Button(top, text="Create Logistic Regression Graphs", command=create_lr_graph, activebackground="pink",
+#        activeforeground="green").place(x=490, y=570)
 
 top.mainloop()
