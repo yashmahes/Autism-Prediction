@@ -1,91 +1,18 @@
 from sklearn.model_selection import train_test_split
+from sklearn.metrics import confusion_matrix
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from tkinter import *
 import pandas as pd
-import numpy as np
+import numpy as np 
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.metrics import roc_curve, auc
 from sklearn import metrics
 
-
-def plot_confusion_metrix(y_train,model_train):
-    cm = metrics.confusion_matrix(y_train, model_train)
-    plt.figure(1)
-    plt.clf()
-    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Wistia)
-    classNames = ['Non-ASD','ASD']
-    plt.title('Confusion Matrix')
-    plt.ylabel('Actual label')
-    plt.xlabel('Predicted label')
-    tick_marks = np.arange(len(classNames))
-    plt.xticks(tick_marks, classNames)
-    plt.yticks(tick_marks, classNames)
-    s = [['TN','FP'], ['FN', 'TP']]
-    for i in range(2):
-        for j in range(2):
-            plt.text(j,i, str(s[i][j])+" = "+str(cm[i][j]))
-    plt.show()
-
-def report_performance(model):
-
-    model_test = model.predict(X_test)
-
-    print("\n\nConfusion Matrix:")
-    print("{0}".format(metrics.confusion_matrix(y_test, model_test)))
-    print("")
-    print("\n\nClassification Report: ")
-    print(metrics.classification_report(y_test, model_test))
-    
-    # acc1.append([ m, metrics.classification_report(y_test, model_test)])
-    
-    plot_confusion_metrix(y_test, model_test)
-    # cm = metrics.confusion_matrix(y_test, model_test)
-    # show_confusion_matrix(cm, ["Non-ASD","ASD"])
-    
-
-total_fpr = {}
-total_tpr = {}
-
-
-def roc_curves(model):
-    predictions_test = model.predict(X_test)
-    fpr, tpr, thresholds = roc_curve(predictions_test,y_test)
-    roc_auc = auc(fpr, tpr)
-    total_fpr[str((str(model).split('(')[0]))] = fpr
-    total_tpr[str((str(model).split('(')[0]))] = tpr
-    plt.figure()
-    plt.plot(fpr, tpr, color='darkorange', lw=1, label='ROC curve (area = %0.3f)' % roc_auc)
-    plt.plot([0, 1], [0, 1], color='navy', lw=2, linestyle='--')
-    plt.xlim([0.0, 1.0])
-    plt.ylim([0.0, 1.05])
-    plt.xlabel('False Positive Rate')
-    plt.ylabel('True Positive Rate')
-    plt.title('Receiver operating characteristic')
-    plt.legend(loc="lower right")
-    plt.show()
-
-data = pd.read_csv('csv_result-Autism_Data.csv')
-data.contry_of_res = data.contry_of_res.astype('str')
-data.contry_of_res = data.contry_of_res.str.lower()
-data.contry_of_res = data.contry_of_res.str.replace("'", "")
-data.contry_of_res = data.contry_of_res.str.strip()
-data.relation = data.relation.replace(np.nan, 'unknown', regex=True)
-data.relation = data.relation.astype('str')
-data.relation = data.relation.str.lower()
-data.relation = data.relation.str.replace("'", "")
-data.relation = data.relation.str.strip()
-data.ethnicity = data.ethnicity.replace(np.nan, 'unknown', regex=True)
-data.ethnicity = data.ethnicity.astype('str')
-data.ethnicity = data.ethnicity.str.lower()
-data.ethnicity = data.ethnicity.str.replace("'", "")
-data.ethnicity = data.ethnicity.str.strip()
-data.age_desc = data.age_desc.replace(np.nan, 'unknown', regex=True)
-data.age_desc = data.age_desc.astype('str')
-data.age_desc = data.age_desc.str.lower()
-data.age_desc = data.age_desc.str.replace("'", "")
-data.age_desc = data.age_desc.str.strip()
+data = pd.read_csv(r'csv_result-Autism_Data.csv')
 n_records = len(data.index)
 n_asd_yes = len(data[data['Class/ASD'] == 'YES'])
 n_asd_no = len(data[data['Class/ASD'] == 'NO'])
@@ -118,7 +45,7 @@ for column in data.columns:
 
 
 features = ['A1_Score', 'A2_Score', 'A3_Score', 'A4_Score', 'A5_Score', 'A6_Score', 'A7_Score', 'A8_Score', 'A9_Score',
-            'A10_Score', 'age', 'gender', 'ethnicity', 'jundice', 'austim', 'contry_of_res', 'used_app_before', 'age_desc', 'relation']
+            'A10_Score','ethnicity','contry_of_res','relation']
 predicted = ['Class/ASD']
 
 X = data[features].values
@@ -132,29 +59,31 @@ knn = KNeighborsClassifier()
 # Fit the model
 knn.fit(X_train, y_train.ravel())
 
+from PIL import Image, ImageTk
 top = Tk()
 
 # You can set the geometry attribute to change the root windows size
-top.geometry("800x700")  # You want the size of the app to be 500x500
+top.geometry("700x700")  # You want the size of the app to be 500x500
 top.resizable(0, 0)  # Don't allow resizing in the x or y direction
-top.title('Autism Spectrum Disorder Classification')
-top.option_add("*Button.Background", "black")
-top.option_add("*Button.Foreground", "red")
-Label(top, text="Features").place(x=30, y=20)
-Label(top, text="Performance").place(x=530, y=20)
+top.title('Autism Spectrum Disorder Classification Tool')
+top.option_add("*Button.Background", "grey")
+top.option_add("*Button.Foreground", "black")
+from PIL import ImageTk, Image
+photo = ImageTk.PhotoImage(Image.open(r'ribbon.png'))
+logo = Label(top, image=photo)
+logo.pack()
+top.mainloop
+
 label_pos_x = 30
 label_pos_y = 50
 
 Label(top, text="A1_Score").place(x=label_pos_x, y=label_pos_y)
-Label(top, text="Accuracy").place(x=label_pos_x+500, y=label_pos_y)
 label_pos_y += 20
 
 Label(top, text="A2_Score").place(x=label_pos_x, y=label_pos_y)
-Label(top, text="Specificity").place(x=label_pos_x+500, y=label_pos_y)
 label_pos_y += 20
 
 Label(top, text="A3_Score").place(x=label_pos_x, y=label_pos_y)
-Label(top, text="Fernitisity").place(x=label_pos_x+500, y=label_pos_y)
 label_pos_y += 20
 
 Label(top, text="A4_Score").place(x=label_pos_x, y=label_pos_y)
@@ -178,31 +107,13 @@ label_pos_y += 20
 Label(top, text="A10_Score").place(x=label_pos_x, y=label_pos_y)
 label_pos_y += 20
 
-Label(top, text="age").place(x=label_pos_x, y=label_pos_y)
+Label(top, text="Ethnicity").place(x=label_pos_x, y=label_pos_y)
 label_pos_y += 20
 
-Label(top, text="gender").place(x=label_pos_x, y=label_pos_y)
+Label(top, text="Contry_of_res").place(x=label_pos_x, y=label_pos_y)
 label_pos_y += 20
 
-Label(top, text="ethnicity").place(x=label_pos_x, y=label_pos_y)
-label_pos_y += 20
-
-Label(top, text="jundice").place(x=label_pos_x, y=label_pos_y)
-label_pos_y += 20
-
-Label(top, text="austim").place(x=label_pos_x, y=label_pos_y)
-label_pos_y += 20
-
-Label(top, text="contry_of_res").place(x=label_pos_x, y=label_pos_y)
-label_pos_y += 20
-
-Label(top, text="used_app_before").place(x=label_pos_x, y=label_pos_y)
-label_pos_y += 20
-
-Label(top, text="age_desc").place(x=label_pos_x, y=label_pos_y)
-label_pos_y += 20
-
-Label(top, text="relation").place(x=label_pos_x, y=label_pos_y)
+Label(top, text="Relation").place(x=label_pos_x, y=label_pos_y)
 label_pos_y += 20
 
 entry_pos_x = 200
@@ -210,20 +121,14 @@ entry_pos_y = 50
 
 e1 = Entry(top)
 e1.place(x=entry_pos_x, y=entry_pos_y)
-accuracy_entry = Entry(top)
-accuracy_entry.place(x=entry_pos_x+400, y=entry_pos_y)
 entry_pos_y += 20
 
 e2 = Entry(top)
 e2.place(x=entry_pos_x, y=entry_pos_y)
-specificity_entry = Entry(top)
-specificity_entry.place(x=entry_pos_x+400, y=entry_pos_y)
 entry_pos_y += 20
 
 e3 = Entry(top)
 e3.place(x=entry_pos_x, y=entry_pos_y)
-fernitisity_entry = Entry(top)
-fernitisity_entry.place(x=entry_pos_x+400, y=entry_pos_y)
 entry_pos_y += 20
 
 e4 = Entry(top)
@@ -266,37 +171,64 @@ e13 = Entry(top)
 e13.place(x=entry_pos_x, y=entry_pos_y)
 entry_pos_y += 20
 
-e14 = Entry(top)
-e14.place(x=entry_pos_x, y=entry_pos_y)
-entry_pos_y += 20
-
-e15 = Entry(top)
-e15.place(x=entry_pos_x, y=entry_pos_y)
-entry_pos_y += 20
-
-e16 = Entry(top)
-e16.place(x=entry_pos_x, y=entry_pos_y)
-entry_pos_y += 20
-
-e17 = Entry(top)
-e17.place(x=entry_pos_x, y=entry_pos_y)
-entry_pos_y += 20
-
-e18 = Entry(top)
-e18.place(x=entry_pos_x, y=entry_pos_y)
-entry_pos_y += 20
-
-e19 = Entry(top)
-e19.place(x=entry_pos_x, y=entry_pos_y)
-entry_pos_y += 20
-
-
-Label(top, text="Classification : ").place(x=120, y=625)
 entryText = StringVar()
 prediction_entry = Entry(top, textvariable=entryText, width=60)
-prediction_entry.place(x=200, y=625)
+prediction_entry.place(x=200, y=460)
 entry_pos_y += 20
 
+entryAccuracy = StringVar()
+accuracy_entry = Entry(top, textvariable=entryAccuracy, width=60)
+accuracy_entry.place(x=200, y=460+20)
+entry_pos_y += 20
+
+Label(top, text="List of features:").place(x=label_pos_x, y=label_pos_y)
+label_pos_y += 20
+
+label_pos_x = 400
+label_pos_y = 20
+
+Label(top, text="Classifier Performance:").place(x=label_pos_x, y=label_pos_y)
+label_pos_y += 20
+
+label_pos_x = 100
+label_pos_y = 460
+
+Label(top, text="Classification:").place(x=label_pos_x, y=label_pos_y)
+label_pos_y += 20
+
+Label(top, text="Accuracy:").place(x=label_pos_x, y=label_pos_y)
+label_pos_y += 20
+
+acc= []
+acc1 = []
+total_accuracy = {}
+def accuracy(model):
+    pred = model.predict(X_test)
+    pred = (pred > 0.5)
+    accu = metrics.accuracy_score(y_test,pred)
+    errors = abs(pred - y_test)
+    print('Model Performance')
+    print("\nAccuracy Of the Model: ",accu)
+    entryAccuracy.set('Accuracy Of the Model: '+ str(accu))
+    print("\nAverage Error: {:0.2f} degrees.".format(np.mean(errors)))
+    total_accuracy[str((str(model).split('(')[0]))] = accu
+    
+    model_test = model.predict(X_test)
+    
+     # true negative, false positive, etc...
+    cm = confusion_matrix(y_test, model_test)
+    
+    total1=sum(sum(cm))
+    
+#confusion matrix calculate sensitivity,specificity
+
+    specificity1 = cm[0,0]/(cm[0,0]+cm[0,1])
+    print('Specificity Of the Model: ', specificity1,'\n' )
+
+    sensitivity1 = cm[1,1]/(cm[1,0]+cm[1,1])
+    print('Sensitivity Of the Model: ', sensitivity1,'\n')
+    
+    acc.append([accu,sensitivity1, specificity1])
 
 def classify_using_knn():
     A1_Score = float(e1.get())
@@ -312,105 +244,19 @@ def classify_using_knn():
     A11_Score = float(e11.get())
     A12_Score = float(e12.get())
     A13_Score = float(e13.get())
-    A14_Score = float(e14.get())
-    A15_Score = float(e15.get())
-    A16_Score = float(e16.get())
-    A17_Score = float(e17.get())
-    A18_Score = float(e18.get())
-    A19_Score = float(e19.get())
 
+    best_grid = KNeighborsClassifier(n_neighbors=14, metric = 'hamming')
+    best_grid.fit(X_train, y_train.ravel())
+    
     prediction = knn.predict([[A1_Score, A2_Score, A3_Score, A4_Score, A5_Score, A6_Score, A7_Score, A8_Score, A9_Score,
-                               A10_Score, A11_Score, A12_Score, A13_Score, A14_Score, A15_Score, A16_Score, A17_Score, A18_Score, A19_Score]])
-
+                               A10_Score, A11_Score, A12_Score, A13_Score]])
+    accuracy(best_grid)
+    #entryText1.set()
+    
     if prediction[0] == 0:
-        entryText.set('Not affected by Autism')
+        entryText.set('Not pre-diagnose with ASD')
     else:
-        entryText.set('Yes, he is affected by autism')
-
-
-def create_knn_graph():
-    from sklearn.neighbors import KNeighborsClassifier
-    from sklearn.model_selection import KFold, cross_val_score
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
-
-    features= ['A9_Score','A6_Score','A5_Score','A7_Score','A8_Score','A2_Score','A3_Score','A4_Score','A1_Score','A10_Score', 'ethnicity','age','relation','jundice','used_app_before','contry_of_res','gender']
-    predicted= ['Class/ASD']
-
-    X = data[features].values
-    y = data[predicted].values
-    # Create standardizer
-    standardizer = StandardScaler()
-
-    knnModel = KNeighborsClassifier ()
-
-    # Create a pipeline that standardizes, then runs logistic regression
-    pipeline = make_pipeline(standardizer, knnModel)
-
-    best_score=0
-    # Create k-Fold cross-validation
-    kf = KFold(n_splits=5, shuffle=True, random_state=0)
-
-
-    # start_time = timer(None)
-    # perform K-fold cross-validation
-    scores = cross_val_score(pipeline, X_train, y_train, cv=kf, scoring='accuracy', n_jobs=-1) # n_jobs=-1# Use all CPU scores
-    print ("K-Fold scores=",scores)
-    # compute mean cross-validation accuracy
-    score = np.mean(scores)
-    print ("Mean=",score)
-
-    # rebuild a model on the combined training and validation set
-    KNN2 = KNeighborsClassifier().fit(X_train, y_train.ravel())
-    # timer(start_time)
-    m = 'K-Nearest Neighbor with features selection & K Fold (Lasso = 0.001)'
-    roc_curves(KNN2)
-
-    # report_performance(KNN2) 
-    #accuracy(KNN2)
-
-
-def create_knn_confusion_matrix():
-    from sklearn.neighbors import KNeighborsClassifier
-    from sklearn.model_selection import KFold, cross_val_score
-    from sklearn.pipeline import make_pipeline
-    from sklearn.preprocessing import StandardScaler
-
-    features= ['A9_Score','A6_Score','A5_Score','A7_Score','A8_Score','A2_Score','A3_Score','A4_Score','A1_Score','A10_Score', 'ethnicity','age','relation','jundice','used_app_before','contry_of_res','gender']
-    predicted= ['Class/ASD']
-
-    X = data[features].values
-    y = data[predicted].values
-    # Create standardizer
-    standardizer = StandardScaler()
-
-    knnModel = KNeighborsClassifier ()
-
-    # Create a pipeline that standardizes, then runs logistic regression
-    pipeline = make_pipeline(standardizer, knnModel)
-
-    best_score=0
-    # Create k-Fold cross-validation
-    kf = KFold(n_splits=5, shuffle=True, random_state=0)
-
-
-    # start_time = timer(None)
-    # perform K-fold cross-validation
-    scores = cross_val_score(pipeline, X_train, y_train, cv=kf, scoring='accuracy', n_jobs=-1) # n_jobs=-1# Use all CPU scores
-    print ("K-Fold scores=",scores)
-    # compute mean cross-validation accuracy
-    score = np.mean(scores)
-    print ("Mean=",score)
-
-    # rebuild a model on the combined training and validation set
-    KNN2 = KNeighborsClassifier().fit(X_train, y_train.ravel())
-    # timer(start_time)
-    m = 'K-Nearest Neighbor with features selection & K Fold (Lasso = 0.001)'
-    # roc_curves(KNN2)
-
-    report_performance(KNN2) 
-    #accuracy(KNN2)
-
+        entryText.set('Pre-diagnosed with ASD, seek clinician for further assistance')
 
 def classify_using_rf():
     A1_Score = float(e1.get())
@@ -426,58 +272,20 @@ def classify_using_rf():
     A11_Score = float(e11.get())
     A12_Score = float(e12.get())
     A13_Score = float(e13.get())
-    A14_Score = float(e14.get())
-    A15_Score = float(e15.get())
-    A16_Score = float(e16.get())
-    A17_Score = float(e17.get())
-    A18_Score = float(e18.get())
-    A19_Score = float(e19.get())
+    
     from sklearn.ensemble import RandomForestClassifier
 
-    RF_model = RandomForestClassifier()
-    RF_model.fit(X_train, y_train.ravel())
+    RF3 = RandomForestClassifier(n_estimators=64 ,min_samples_split=12,min_samples_leaf=2,max_features=13,max_depth= 11, bootstrap=True)
+    RF3.fit(X_train, y_train.ravel())
 
-    prediction = RF_model.predict([[A1_Score, A2_Score, A3_Score, A4_Score, A5_Score, A6_Score, A7_Score, A8_Score, A9_Score,
-                               A10_Score, A11_Score, A12_Score, A13_Score, A14_Score, A15_Score, A16_Score, A17_Score, A18_Score, A19_Score]])
-
+    prediction = RF3.predict([[A1_Score, A2_Score, A3_Score, A4_Score, A5_Score, A6_Score, A7_Score, A8_Score, A9_Score,
+                               A10_Score, A11_Score, A12_Score, A13_Score]])
+    accuracy(RF3)
+    
     if prediction[0] == 0:
-        entryText.set('Not affected by Autism')
+        entryText.set('Not pre-diagnose with ASD')
     else:
-        entryText.set('Yes, he is affected by autism')
-
-
-def create_rf_graph():
-    #import KNeighborsClassifier
-    import numpy as np
-    from sklearn.neighbors import KNeighborsClassifier
-
-    # Setup arrays to store training and test accuracies
-    neighbors = np.arange(1, 30)
-    train_accuracy = np.empty(len(neighbors))
-    test_accuracy = np.empty(len(neighbors))
-    for i, k in enumerate(neighbors):
-        # Setup a knn classifier with k neighbors
-        knn = KNeighborsClassifier(n_neighbors=k)
-    # Fit the model
-        knn.fit(X_train, y_train.ravel())
-        knn.fit(X_test, y_test.ravel())
-    # Compute accuracy on the training set
-        train_accuracy[i] = knn.score(X_train, y_train.ravel())
-        print("train_accuracy=", train_accuracy[i])
-    # Compute accuracy on the test set
-        test_accuracy[i] = knn.score(X_test, y_test)
-        print("test_accuracy=", test_accuracy[i])
-
-    # Generate plot
-
-    plt.title('k-NN Varying number of neighbors')
-    plt.plot(neighbors, test_accuracy, label='Testing Accuracy')
-    plt.plot(neighbors, train_accuracy, label='Training accuracy')
-    plt.legend()
-    plt.xlabel('Number of neighbors')
-    plt.ylabel('Accuracy')
-    plt.show()
-
+        entryText.set('Pre-diagnosed with ASD, seek clinician for further assistance')
 
 def classify_using_lr():
     from sklearn.linear_model import LogisticRegression
@@ -494,75 +302,55 @@ def classify_using_lr():
     A11_Score = float(e11.get())
     A12_Score = float(e12.get())
     A13_Score = float(e13.get())
-    A14_Score = float(e14.get())
-    A15_Score = float(e15.get())
-    A16_Score = float(e16.get())
-    A17_Score = float(e17.get())
-    A18_Score = float(e18.get())
-    A19_Score = float(e19.get())
-    LogRegModel1 = LogisticRegression().fit(X_train, y_train.ravel())
 
-    prediction = LogRegModel1.predict([[A1_Score, A2_Score, A3_Score, A4_Score, A5_Score, A6_Score, A7_Score, A8_Score, A9_Score,
-                               A10_Score, A11_Score, A12_Score, A13_Score, A14_Score, A15_Score, A16_Score, A17_Score, A18_Score, A19_Score]])
+    from sklearn.linear_model import LogisticRegression
+    from sklearn.model_selection import KFold, cross_val_score
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import StandardScaler
 
+        # Create standardizer
+    standardizer = StandardScaler()
+
+        # Create logistic regression
+    for c in [0.00001, 0.0001, 0.001, 0.1, 1, 10]:
+        logRegModel = LogisticRegression(C=c)
+
+        # Create a pipeline that standardizes, then runs logistic regression
+        pipeline = make_pipeline(standardizer, logRegModel)
+
+        best_score=0
+        # Create k-Fold cross-validation
+        kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+
+        # perform K-fold cross-validation
+        scores = cross_val_score(pipeline, X_train, y_train, cv=kf, scoring='accuracy', n_jobs=-1)
+            
+        # compute mean cross-validation accuracy
+        score = np.mean(scores)
+            
+        # Find the best parameters and score
+        if score > best_score:
+            best_score = score
+            best_parameters = c
+            
+    LogRegModel = LogisticRegression().fit(X_train, y_train.ravel())
+
+    prediction = LogRegModel.predict([[A1_Score, A2_Score, A3_Score, A4_Score, A5_Score, A6_Score, A7_Score, A8_Score, A9_Score,
+                               A10_Score, A11_Score, A12_Score, A13_Score]])
+
+    accuracy(LogRegModel)
+    
     if prediction[0] == 0:
-        entryText.set('Not affected by Autism')
+        entryText.set('Not pre-diagnose with ASD')
     else:
-        entryText.set('Yes, he is affected by autism')
+        entryText.set('Pre-diagnosed with ASD, seek clinician for further assistance')
 
-
-def create_lr_graph():
-    #import KNeighborsClassifier
-    import numpy as np
-    from sklearn.neighbors import KNeighborsClassifier
-
-    # Setup arrays to store training and test accuracies
-    neighbors = np.arange(1, 30)
-    train_accuracy = np.empty(len(neighbors))
-    test_accuracy = np.empty(len(neighbors))
-    for i, k in enumerate(neighbors):
-        # Setup a knn classifier with k neighbors
-        knn = KNeighborsClassifier(n_neighbors=k)
-    # Fit the model
-        knn.fit(X_train, y_train.ravel())
-        knn.fit(X_test, y_test.ravel())
-    # Compute accuracy on the training set
-        train_accuracy[i] = knn.score(X_train, y_train.ravel())
-        print("train_accuracy=", train_accuracy[i])
-    # Compute accuracy on the test set
-        test_accuracy[i] = knn.score(X_test, y_test)
-        print("test_accuracy=", test_accuracy[i])
-
-    # Generate plot
-
-    plt.title('k-NN Varying number of neighbors')
-    plt.plot(neighbors, test_accuracy, label='Testing Accuracy')
-    plt.plot(neighbors, train_accuracy, label='Training accuracy')
-    plt.legend()
-    plt.xlabel('Number of neighbors')
-    plt.ylabel('Accuracy')
-    plt.show()
-
-
-# Button(top, text="Confusion matrix using KNN", command=create_knn_confusion_matrix, activebackground="pink",
-#        activeforeground="blue").place(x=50, y=470)
-
-Button(top, text="Classify using KNN", command=classify_using_knn, activebackground="pink",
-       activeforeground="blue").place(x=230, y=470)
-
-# Button(top, text="Create KNN Graphs", command=create_knn_graph, activebackground="pink",
-#        activeforeground="green").place(x=490, y=470)
-
-Button(top, text="Classify using RF", command=classify_using_rf, activebackground="pink",
-       activeforeground="blue").place(x=230, y=520)
-
-# Button(top, text="Create Random Forest Graphs", command=create_rf_graph, activebackground="pink",
-#        activeforeground="green").place(x=490, y=520)
-
-Button(top, text="Classify using LR", command=classify_using_lr, activebackground="pink",
-       activeforeground="blue").place(x=230, y=570)
-
-# Button(top, text="Create Logistic Regression Graphs", command=create_lr_graph, activebackground="pink",
-#        activeforeground="green").place(x=490, y=570)
+Button(top, text="Classify using K-Nearest Neigbhbors", command=classify_using_knn, activebackground="pink",
+       activeforeground="blue").place(x=200, y=420)
+Button(top, text="Classify using Random Forest", command=classify_using_rf, activebackground="pink",
+       activeforeground="blue").place(x=200, y=385)
+Button(top, text="Classify using Logistic Regression", command=classify_using_lr, activebackground="pink",
+       activeforeground="blue").place(x=200, y=350)
 
 top.mainloop()
